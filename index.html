@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="utf-8" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+
+  <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+
+<style>
+ul {
+  padding-left: 10px;
+  list-style: none;
+}
+
+li {
+  padding: 5px;
+}
+
+.link {
+  background: #aa0;
+  color: #000;
+  padding: 5px;
+}
+
+header .button {
+  float: left;
+  padding: 7px 12px;
+  background: #9209FF;
+  color: #fff;
+  margin: 5px;
+}
+
+header {
+  height: 40px;
+}
+
+
+.directory, .file {
+  padding: 10px 0 10px 0;
+}
+
+.directory {
+  font-weight: bold;
+}
+
+.rar {
+  background: #000;
+  color: #fff;
+}
+
+</style>
+</head>
+<body>
+<header>
+<div class='button play'>play</div>
+<div class='button pause'>pause</div>
+</header>
+<div class='dir'></div>
+<script>
+
+function launch(path) {
+  $.get('/launch', { path: path }, function() {});
+}
+
+function play() {
+  $.get('/play', function() {});
+}
+
+function pause() {
+  $.get('/pause', function() {});
+}
+
+if (!String.prototype.endsWith) {
+  Object.defineProperty(String.prototype, 'endsWith', {
+    value: function(searchString, position) {
+      var subjectString = this.toString();
+      if (position === undefined || position > subjectString.length) {
+        position = subjectString.length;
+      }
+      position -= searchString.length;
+      var lastIndex = subjectString.indexOf(searchString, position);
+      return lastIndex !== -1 && lastIndex === position;
+    }
+  });
+}
+
+function dir(path) {
+  $('.dir').empty();
+
+  $.get(
+    '/dir',
+    { path: path },
+    function(files) {
+      renderList(files);
+    },
+    'json'
+  );
+
+  function filter(file) {
+    return file.isDirectory ||
+      file.filename.endsWith('.rar');
+  }
+
+  function addBackLink() {
+    var div = $("<div>");
+    div.text('Back').addClass('directory');
+    $('.dir').prepend(div);
+
+    div.click(function() {
+      history.back();
+    });
+  }
+
+  function renderList(files) {
+
+    if (path.length>1) {
+      addBackLink();
+    }
+
+    files.filter(filter).forEach(function(file) {
+      $('.dir').append(fileToDiv(file));
+    });
+  }
+
+  function fileToDiv(file) {
+    var div = $("<div>");
+    div.addClass(
+      file.isFile?'file':(file.isDirectory?'directory':'')
+    );
+    if (file.si && file.si.title) {
+      div.text(file.si.title);
+    } else if (file.rarInfo) {
+      div.text(file.rarInfo.file);
+      div.addClass('rar');
+    } else {
+      div.text(file.filename);
+    }
+
+    if (file.isDirectory) {
+      div.click(function() {
+        history.pushState(file.path, file.path, "#" + file.path);
+        dir(file.path);
+      });
+    }
+
+    if (file.rarInfo) {
+      div.click(function() {
+        launch(file.path);
+      });
+    }
+
+    return div;
+  }
+}
+
+$(function() {
+
+  dir('');
+  window.onpopstate = function(event) {
+    console.log('back', event.state);
+    dir(event.state || '');
+  }
+
+  $('.button.play').click(play);
+  $('.button.pause').click(pause);
+});
+
+</script>
+</body>
+</html>
