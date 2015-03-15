@@ -1,12 +1,12 @@
 {
-  "name": "webrartranscast",
-  "version": "0.0.0",
+  "name": "transcode-cast",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Mattias Rost",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.12.0",
@@ -14,6 +14,7 @@
     "delayed-stream": "0.0.6",
     "express": "^4.12.2",
     "internal-ip": "^1.0.0",
+    "stream-transcoder": "0.0.5",
     "walk": "^2.3.9"
   }
 }
