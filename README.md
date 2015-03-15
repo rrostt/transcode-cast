@@ -2,7 +2,11 @@
 
 Requires ffmpeg and ffprobe
 
-Start using 'node index.js /path/to/media'.
+Can either be used to start standalone media files from rar archives, or run as a web server from which videos can be started from a web site.
+
+Start web server using 'node server.js /path/to/media'.
+
+Cast a video using 'node startTranscoder.js /path/to/rar'.
 
 It will transcode media directly from rar archives to nearest Chromecast.
 
