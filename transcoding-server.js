@@ -20,6 +20,8 @@ function startTranscodingServer(path, port) {
     // get rarStream again, set ffmpeg flags based on analysis from ffprobe
 
     videoSupport( rar.openRarStream(path), function(support) {
+      console.log('got support ' + JSON.stringify(support) );
+
       var rarStream = rar.openRarStream(path);
       var trans = new Transcoder( rarStream )
   	  .custom('strict', 'experimental')
@@ -54,9 +56,17 @@ function startTranscodingServer(path, port) {
       args.push('pipe:1');
       console.log('spawning ffmpeg %s', args.join(' '));
 
-      trans.stream().pipe(res);
+      var transStream = trans.stream();
+      transStream.pipe(res);
 
       rarStream.on('end', function() { console.log('rar stream ended'); });
+
+      req.on('close', stopStream);
+      req.on('end', stopStream);
+
+      function stopStream() {
+        transStream.destroy();
+      }
     });
 
   }).listen(port);

@@ -10,7 +10,7 @@ if (!String.prototype.endsWith) {
 
 function listDir(dirpath, cb) {
   fs.readdir(dirpath, function(err, files) {
-    var infos = files.map(function(filename) {
+    var infos = files.filter(function(filename) { return filename.indexOf('.')!=0; }).map(function(filename) {
 
       var file = path.resolve(dirpath, filename);
       var stat = fs.statSync(file);
