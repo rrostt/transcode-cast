@@ -45,6 +45,11 @@ header {
   font-weight: bold;
 }
 
+.file {
+  background: #fff;
+  color: #0f0;
+}
+
 .rar {
   background: #000;
   color: #fff;
@@ -99,8 +104,9 @@ function dir(path) {
   );
 
   function filter(file) {
+    var validEndings = ['.rar','.mkv','.mp4','.avi'];
     return file.isDirectory ||
-      file.filename.endsWith('.rar');
+      validEndings.indexOf(file.filename.substring(file.filename.length-4))!=-1;
   }
 
   function addBackLink() {
@@ -133,7 +139,7 @@ function dir(path) {
       div.text(file.si.title);
     } else if (file.rarInfo) {
       div.text(file.rarInfo.file);
-      div.addClass('rar');
+      div.addClass('rar'); //.removeClass('file');
     } else {
       div.text(file.filename);
     }
@@ -145,7 +151,7 @@ function dir(path) {
       });
     }
 
-    if (file.rarInfo) {
+    if (file.rarInfo || file.isFile) {
       div.click(function() {
         launch(file.path);
       });

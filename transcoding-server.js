@@ -19,11 +19,19 @@ function startTranscodingServer(path, port) {
     // get rarStream, analyse with ffprobe
     // get rarStream again, set ffmpeg flags based on analysis from ffprobe
 
-    videoSupport( rar.openRarStream(path), function(support) {
+    function openVideoStream() {
+      if (path.substring(path.length-4)=='.rar') {
+        return rar.openRarStream(path);
+      } else {
+        return fs.createReadStream(path);
+      }
+    }
+
+    videoSupport( openVideoStream(), function(support) {
       console.log('got support ' + JSON.stringify(support) );
 
-      var rarStream = rar.openRarStream(path);
-      var trans = new Transcoder( rarStream )
+      var videoStream = openVideoStream();
+      var trans = new Transcoder( videoStream )
   	  .custom('strict', 'experimental')
           .format('matroska')
 //          .custom('ss', '00:20:00')
@@ -54,12 +62,12 @@ function startTranscodingServer(path, port) {
       var args = trans._compileArguments();
       args = [ '-i', '-' ].concat(args);
       args.push('pipe:1');
-      console.log('spawning ffmpeg %s', args.join(' '));
+      console.log('spawning ffmpeg ', args.join(' '));
 
       var transStream = trans.stream();
       transStream.pipe(res);
 
-      rarStream.on('end', function() { console.log('rar stream ended'); });
+      videoStream.on('end', function() { console.log('video stream ended'); });
 
       req.on('close', stopStream);
       req.on('end', stopStream);
