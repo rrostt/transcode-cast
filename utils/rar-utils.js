@@ -20,6 +20,22 @@ function openRarStream(path, cb) {
     console.log('unrar error');
   });
 
+  child.stdout.on('error', function() {
+    console.log('rar error');
+  });
+
+  child.stdout.on('end', function() {
+    console.log('rar ended');
+  });
+
+  child.on('disconnect', function() {
+    console.log('rar disconnect');
+  });
+
+  child.on('close', function() {
+    console.log('rar closed');
+  });
+
   child.on('exit', function(code) {
     console.log('unrar exited');
   });

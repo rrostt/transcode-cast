@@ -55,7 +55,7 @@ app.get('/launch', function(req, res) {
 
   streamserver = transServer.start(filePath, castport);
 
-  player.launch("http://" + internalIp() + ":" + castport + "/video.mp4", function(err, p) {
+  player.launch("http://" + internalIp() + ":" + castport + "/video.mp4?path=" + filePath, function(err, p) {
     p.once('playing', function() {
       console.log('now playing');
       res.send('playing');
@@ -63,6 +63,21 @@ app.get('/launch', function(req, res) {
       state.path = path;
     });
   });
+});
+
+app.get('/host', function(req, res) {
+  var requestPath = req.param('path');
+  if (requestPath.indexOf('/')==0) requestPath = requestPath.substring(1);
+  var filePath = path.resolve( libraryPath, requestPath );
+
+  if (streamserver) {
+    streamserver.close();
+    streamserver = undefined;
+  }
+
+  streamserver = transServer.start(filePath, castport);
+
+  res.send('http://' + internalIp() + ':' + castport + "/video.mkv?path=" + filePath);
 });
 
 app.get('/state', function(req, res) {

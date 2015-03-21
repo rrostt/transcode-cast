@@ -6,6 +6,7 @@ var stream = require('stream');
 var DelayedStream = require('delayed-stream');
 var fs = require('fs');
 var videoSupport = require('./utils/video-support');
+var url = require('url');
 
 function startTranscodingServer(path, port) {
 
@@ -15,6 +16,13 @@ function startTranscodingServer(path, port) {
     });
 
     console.log('http request');
+
+//    requestedPath = url.parse(req.url, true).pathname.substring(1);
+    var requestedPath = url.parse(req.url, true).query.path;
+
+    console.log(requestedPath);
+
+    path = requestedPath;
 
     // get rarStream, analyse with ffprobe
     // get rarStream again, set ffmpeg flags based on analysis from ffprobe
@@ -34,6 +42,7 @@ function startTranscodingServer(path, port) {
       var trans = new Transcoder( videoStream )
   	  .custom('strict', 'experimental')
           .format('matroska')
+//          .format('mp4')
 //          .custom('ss', '00:20:00')
           .on('finish', function() {
             console.log('finished transcoding');
@@ -73,6 +82,8 @@ function startTranscodingServer(path, port) {
       req.on('end', stopStream);
 
       function stopStream() {
+        console.log('Connection closed');
+	transStream.unpipe();
         transStream.destroy();
       }
     });

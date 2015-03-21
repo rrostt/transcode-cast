@@ -8,54 +8,66 @@
 
   <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 
-<style>
-ul {
-  padding-left: 10px;
-  list-style: none;
-}
+  <style>
 
-li {
-  padding: 5px;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.link {
-  background: #aa0;
-  color: #000;
-  padding: 5px;
-}
+    ul {
+      padding-left: 10px;
+      list-style: none;
+    }
 
-header .button {
-  float: left;
-  padding: 7px 12px;
-  background: #9209FF;
-  color: #fff;
-  margin: 5px;
-}
+    li {
+      padding: 5px;
+    }
 
-header {
-  height: 40px;
-}
+    .link {
+      background: #aa0;
+      color: #000;
+      padding: 5px;
+    }
+
+    header .button {
+      float: left;
+      padding: 7px 12px;
+      background: #9209FF;
+      color: #fff;
+      margin: 5px;
+    }
+
+    header {
+      height: 40px;
+    }
 
 
-.directory, .file {
-  padding: 10px 0 10px 0;
-}
+    .directory, .file {
+      padding: 10px 0 10px 0;
+    }
 
-.directory {
-  font-weight: bold;
-}
+    .directory {
+      font-weight: bold;
+    }
 
-.file {
-  background: #fff;
-  color: #0f0;
-}
+    .file {
+      background: #fff;
+      color: #0f0;
+    }
 
-.rar {
-  background: #000;
-  color: #fff;
-}
+    .rar {
+      background: #000;
+      color: #fff;
+    }
 
-</style>
+    .playrow .button.play {
+      width: 50%;
+      display: inline-block;
+      text-align: center;
+      padding: 0.5em;
+    }
+
+  </style>
 </head>
 <body>
 <header>
@@ -67,6 +79,21 @@ header {
 
 function launch(path) {
   $.get('/launch', { path: path }, function() {});
+}
+
+function playInBrowser(path) {
+  $.get('/host', { path: path }, function(url) {
+    console.log('hosted at ' + url);
+
+    $('.modal').remove();
+    var modal = $("<div class='modal'></div>");
+
+    modal.appendTo("body");
+
+    var video = $("<video src='" + url + "' controls autoplay></video>");
+    video.width($("body").width());
+    modal.append(video);
+  });
 }
 
 function play() {
@@ -146,15 +173,23 @@ function dir(path) {
 
     if (file.isDirectory) {
       div.click(function() {
-        history.pushState(file.path, file.path, "#" + file.path);
+        history.pushState(file.path, file.path, ""); //"#" + file.path);
         dir(file.path);
       });
     }
 
     if (file.rarInfo || file.isFile) {
-      div.click(function() {
-        launch(file.path);
-      });
+//      div.click(function() {
+//        launch(file.path);
+//        playInBrowser(file.path);
+//      });
+      var buttons = $("<div class='playrow'></div>");
+      var cast = $("<div class='button play'>cast</div>");
+      var inBrowser = $("<div class='button play'>browser</div>");
+      buttons.append(cast).append(inBrowser);
+      cast.click(function() { launch(file.path); });
+      inBrowser.click(function() { playInBrowser(file.path); });
+      div.append(buttons);
     }
 
     return div;
